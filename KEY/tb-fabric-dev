@@ -1,0 +1,14 @@
+{
+  "type": "service_account",
+  "project_id": "tb-fabric",
+  "private_key_id": "b8f5b15bdc4b44eb9c5cf69302cc0aadc99c869b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCgVULTQW9tItSd\ndeJimK+wWBE4FoIvWbvcjbYIk+h3tUu3KpyZ6QWpRhY+5Q9aKDl8RmvCcybnTBP9\neIo0w9GZwfEuVM/U2sDOsS+MDFPEB73E1oltHFLpjkHpREiWDXqdnSAHuX/av9mU\numJO7b1bxn0sy0UsIEZXLnSWLApqNlOtLk3tqngDRSadaghAWw5WXDT8nX44vwtU\n9EcFm89vPY9eeIsdFjPZcwc9ts886gdCnj6naAmCnCmw4kcSTJkpebvoz/2tb5+W\n+9JVVLXmqcFgzSyEvefn5uc4Q2VdaN6yrVq92mnluwHssgMhYkqiNx5B/Hf2EOj/\nKf+ITTIbAgMBAAECggEATPsy9zC7Wdi34hSISlPKQy69scLo5eg9UXO/G5Y8r0Fe\nZccxYpqmC7TpmHAts1mN5FQBiF72pmZ6UKDQJu6AVEVw0hCJq0cO/Q7I6ALBM2WO\nIZTqbfeD/by+e8w718QIA+Y9y0evEi48P3NQIVp3qTl/v4Knpzyl2VUmSDZEF+NT\nkQvQtWPU1nTJWAhASnuSU7qVYugB8PAkJXbWUqO/tp3GR9MkV79gsf4f6ZAsi6JJ\ntBj0/Ii4B6MxwfEADE/EDIByNjnf7xC2lomyNcRr4ewU2BN9RZyh1uJP8h1vGUL8\nBcLcUi+apWf3kjc8rnmKDbUThGI2Gii0dOJAbiWInQKBgQDbq/tWs5BBXPf3S7ed\nVZIYsWsMD+Chc/dESx2mr4XgdeAQwe1CvUqBdYZIl+DwpwtFKHnHj8J36zBWwyou\nZ0Tap5Nnh7qBZmU4VuX+atjYhkXjE6ESg9g8E4bUyARECJRH7AleNYnwq4ym2rQN\nPminsWwwbCRVC2qj5R7YPsle9QKBgQC62R2i1qG4Agm1ob8r9BsBQnHR5/RxNTbW\nHOeFjc9lCAm155A7XLXiurFcAoMHCIbrSBVEZCLm2JLX4tsf2ndylV9WWtOw9uEH\nPmQHks8gsSpB/HKhcdtv3aHlEALZ/hE3rS5ZOsMSz816DalPXmc0/lyj+e2T9lqr\nKJOBEZ2CzwKBgQCPUOwAi9QQoNvyTkbz8fEIBTBGxVETZLospykoJ5mbcKwHos3t\nXdvvDELYt6X8u67hpt+UsBj67ckywc+SSLOmR/AmemnWpHxjPmZ9Dy58TVXpKVRL\n5RK9Vyv/RKNr04EST09pVFqzVujDryoK/e1/goSILvWhOnqPhRsTkBsGxQKBgQCY\ncpLCjHnP5yHC5uBSXU03Pt4c1DLVtwQxt82SYvymwuMhXniIZoEkJwyUNJxxPZzP\nFLX9YfI0BNnyeG4uVBIHFCaAD4UOqq85OMdmgnqqgsImqnFglcPjRqJTgTfCYo/r\nrEnXlaEZlSBiCAlu72gnja1KQJ19jo+1fFq1AQlRcwKBgQCsWjui1SsORCDiUT+Z\nhmZ6zxza29fOrSNW4WAzKCz7TClgyj6Nk+BiuvMguJRlVTo9kErgRBaGp51gzG7j\n/auT0a/+qm7Eeaq8S6cplLhzwuu7lwXw4/8HYSn+iZbJmmOXdkP6iaP8lDHRRtHH\nwA5nI0Hyklvp8zB6TDEVVTJULw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "botflow@tb-fabric.iam.gserviceaccount.com",
+  "client_id": "103565158338581888933",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/botflow%40tb-fabric.iam.gserviceaccount.com",
+  "spreadsheet_id" : "1d3qNianTAuZIrUiPnspcdtV8FfsI5j5NK5TGWYNUZPU",
+  "botTOKEN" : "7228467084:AAF2bfbwiLWm6h15XKOsYklT11YocXAqfmc"
+}

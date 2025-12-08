@@ -1,0 +1,19 @@
+version: '1.1'
+
+services:
+  valya:
+    image: tbot01:latest  # Использование одного образа
+    build: .             # Сборка образа (если его нет)
+    volumes:
+      - .:/app           # Монтирование локальной директории в контейнер
+    environment:
+      - KEY_PATH=KEY/tb-fabric_valya.json
+    restart: always
+  mama:
+    image: tbot01:latest  # Использование того же образа
+    build: .             # Сборка образа (если его нет)
+    volumes:
+      - .:/app           # Монтирование локальной директории в контейнер
+    environment:
+      - KEY_PATH=KEY/tb-fabric_mama.json
+    restart: always

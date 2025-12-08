@@ -984,10 +984,20 @@ async def main():
     # Ожидание завершения задачи
     while True:
         time.sleep(60)
-        
-import sys
 
+from flask import Flask, Response
+
+app = Flask(__name__)
+
+@app.route("/", methods=["GET", "HEAD"])
+def healthcheck():
+    # UptimeRobot / любой монитор получает 200 OK и не даёт Render «заснуть»
+    return Response(status=200)
+
+import sys
 
 if __name__ == '__main__':
     # Запуск асинхронного цикла событий в отдельном потоке
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
     asyncio.run(main())

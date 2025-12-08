@@ -1,4 +1,3 @@
-import docker
 import gspread
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton

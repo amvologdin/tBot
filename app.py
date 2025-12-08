@@ -998,7 +998,15 @@ def healthcheck():
 import sys
 
 if __name__ == '__main__':
-    # Запуск асинхронного цикла событий в отдельном потоке
+    # 1. Запускаем твой основной асинхронный код бота в отдельном потоке
+    import threading
+
+    def run_bot():
+        asyncio.run(main())
+
+    bot_thread = threading.Thread(target=run_bot, daemon=True)
+    bot_thread.start()
+
+    # 2. Запускаем Flask-приложение, чтобы Render видел HTTP-сервис
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-    asyncio.run(main())

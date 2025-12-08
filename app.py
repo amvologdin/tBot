@@ -992,7 +992,6 @@ app = Flask(__name__)
 @app.route("/", methods=["GET", "HEAD"])
 def healthcheck():
     # UptimeRobot / любой монитор получает 200 OK и не даёт Render «заснуть»
-    asyncio.run(main())
     return Response(status=200)
 
 import sys

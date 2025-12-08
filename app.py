@@ -49,7 +49,7 @@ if key_path:
     key_file = key_path
     print(f"Используем ключ: {key_path}")
 else:
-    key_file = 'KEY/tb-fabric.json'
+    key_file = 'KEY/tb-fabric-dev.json'
 
 # Параметры авторизации в Google API
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']

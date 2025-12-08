@@ -2,27 +2,25 @@ import gspread
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 import time
 import crcmod.predefined
 import threading
 import asyncio
 import pandas as pd
-from datetime import timedelta
 import numpy as np
 import json
 import os
+
 
 def is_running_in_docker():
     """
     Проверяет, запущен ли скрипт внутри Docker-контейнера.
     """
-    # Проверяем наличие файла /.dockerenv (Docker создает его внутри контейнера)
     if os.path.exists('/.dockerenv'):
         return True
 
-    # Проверяем cgroup (внутри контейнера обычно есть упоминание о Docker)
     try:
         with open('/proc/self/cgroup', 'r') as f:
             if 'docker' in f.read():
@@ -32,34 +30,50 @@ def is_running_in_docker():
 
     return False
 
-'''if is_running_in_docker():
-    client = docker.from_env()
-    # Получаем ID текущего контейнера
-    container_id = open('/proc/self/cgroup').read().split('/docker/')[-1].strip()
-    # Получаем объект контейнера
-    container = client.containers.get(container_id)
-    # Получаем параметры контейнера
-    print(container.attrs)
-    key_file = 'KEY/tb-fabric.json'
-else:'''
 
-key_path = os.getenv("KEY_PATH")
-if key_path:
-    key_file = key_path
-    print(f"Используем ключ: {key_path}")
+# ---------- Загрузка сервисного ключа Google с вариативностью ----------
+
+# 1) Пытаемся взять полный JSON сервисного аккаунта из переменной окружения
+sa_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
+
+if sa_json:
+    # Вариант для Render: JSON в переменной окружения
+    creds_dict = json.loads(sa_json)
+
+    scope = [
+        "https://spreadsheets.google.com/feeds",
+        "https://www.googleapis.com/auth/drive",
+    ]
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+
+    spreadsheet_id = creds_dict["spreadsheet_id"]
+    TOKEN = creds_dict["botTOKEN"]
+
+    print("Используем ключ из переменной окружения GOOGLE_SERVICE_ACCOUNT_JSON")
+
 else:
-    key_file = 'KEY/tb-fabric-dev.json'
+    # Fallback: локальный запуск как раньше — читаем файл
+    key_path = os.getenv("KEY_PATH")
+    if key_path:
+        key_file = key_path
+        print(f"Используем ключ из KEY_PATH: {key_path}")
+    else:
+        key_file = "KEY/tb-fabric-dev.json"
+        print(f"Используем ключ по умолчанию: {key_file}")
 
-# Параметры авторизации в Google API
-scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name(key_file, scope)
-with open(key_file, 'r', encoding='utf-8') as file:
-    data = json.load(file)
+    scope = [
+        "https://spreadsheets.google.com/feeds",
+        "https://www.googleapis.com/auth/drive",
+    ]
+    creds = ServiceAccountCredentials.from_json_keyfile_name(key_file, scope)
 
-# ID Google таблицы
-spreadsheet_id =  data['spreadsheet_id']
-# Настройки Telegram Bot API
-TOKEN = data['botTOKEN']
+    with open(key_file, "r", encoding="utf-8") as file:
+        data = json.load(file)
+
+    spreadsheet_id = data["spreadsheet_id"]
+    TOKEN = data["botTOKEN"]
+
+
 
 welcome_message = 'Я твой личный помощник для ведения учета рабочего времени и отчетности. \n\nПосле каждого рабочего дня, я буду ждать тебя с отчетом о проделанной работе. Это поможет тебе не только точно отслеживать свой рабочий график, но и получать заработанные деньги вовремя. \n\nНо самое главное, не забывай отдыхать и заботиться о своем физическом и эмоциональном здоровье - это тоже очень важно!'
 

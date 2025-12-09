@@ -884,7 +884,7 @@ def admin_user_report_callback(callback_query):
                 table += f"<b><u>{row[0]}</u></b>\n"
             table += f"<b>{row[2].ljust(25 - len(row[2]))}</b>"
             table += f"<b>{row[3].rjust(20 - len(row[3]))}</b>"
-            table += f"<b>{row[5].rjust(15 - len(row[5]))}</b>"
+            table += f"<b>{row[5].rjust(15 - len(row[5]))}</b>\n"
             prev = row[1]
             if len(table) > 3000:
                 messages.append(table)

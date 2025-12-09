@@ -364,9 +364,10 @@ bot = MyBot(TOKEN)
 #  Клавиатуры
 # ==============================
 
-def build_main_reply_keyboard() -> ReplyKeyboardMarkup:
-    """Главное меню в виде reply‑клавиатуры."""
+def build_main_reply_keyboard(user_id: int) -> ReplyKeyboardMarkup:
+    """Главное меню в виде reply‑клавиатуры с учетом прав админа."""
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
+    
     kb.row(
         KeyboardButton("📝 Заполнить отчет"),
         KeyboardButton("📊 Результат за день"),
@@ -375,9 +376,16 @@ def build_main_reply_keyboard() -> ReplyKeyboardMarkup:
         KeyboardButton("📅 Результат за месяц"),
         KeyboardButton("🕒 Последние 3 операции"),
     )
-    kb.row(
-        KeyboardButton("🎭 Анекдот"),
-    )
+    
+    # Анекдот + Админ в одном ряду
+    if is_admin(user_id):
+        kb.row(
+            KeyboardButton("🎭 Анекдот"),
+            KeyboardButton("🔧 Админ")
+        )
+    else:
+        kb.row(KeyboardButton("🎭 Анекдот"))
+    
     return kb
 
 
@@ -870,29 +878,49 @@ def admin_user_report_callback(callback_query):
     reload_data(scope="r")
     results_detail = results
 
-    table = ""
-    prev = ""
     messages = []
+    current_table = ""
+    prev_user = None
 
     if len(results_detail) > 1:
         for row in results_detail:
             if len(row) < 6 or not row[1]:
                 continue
-            if prev != row[1] and row[0]:
-                table += "\n"
-            if prev != row[1]:
-                table += f"<b><u>{row[0]}</u></b>\n"
-            table += f"<b>{row[2].ljust(25 - len(row[2]))}</b>"
-            table += f"<b>{row[3].rjust(20 - len(row[3]))}</b>"
-            table += f"<b>{row[5].rjust(15 - len(row[5]))}</b>\n"
-            prev = row[1]
-            if len(table) > 3000:
-                messages.append(table)
-                table = ""
-        if table:
-            messages.append(table)
+                
+            current_user = row[1]
+            
+            # Новая группа пользователя - добавляем разделитель
+            if prev_user != current_user and prev_user is not None:
+                current_table += "\n"
+            
+            # Имя пользователя жирным подчеркиванием
+            if prev_user != current_user:
+                current_table += f"<b><u>{row[0]}</u></b>\n"
+                prev_user = current_user
+            
+            # Правильное форматирование строк с фиксированной шириной
+            date_str = str(row[2])[:10] if row[2] else ""
+            amount_str = f"{float(row[3]):>10,.2f}".replace(',', ' ').replace('.', ',') if row[3] else ""
+            time_str = str(row[5])[:5] if row[5] else ""
+            
+            line = f"{date_str:<12} {amount_str:<12} {time_str:>8}\n"
+            current_table += line
+            
+            # Разбиваем на сообщения по 3000 символов
+            if len(current_table) > 2800:  # Оставляем запас
+                messages.append(current_table)
+                current_table = ""
+        
+        if current_table:
+            messages.append(current_table)
     else:
         messages.append("Пока пусто")
+
+    bot.delete_message(callback_query.message.chat.id, info.message_id)
+    
+    # Отправляем все сообщения
+    for msg in messages:
+        bot.send_message(callback_query.message.chat.id, msg, parse_mode='HTML')
 
     bot.delete_message(callback_query.message.chat.id, info.message_id)
     for i, msg in enumerate(messages):

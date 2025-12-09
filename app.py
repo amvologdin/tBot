@@ -485,14 +485,12 @@ def is_admin(message=None, user_id=None) -> bool:
         if message is None:
             return False
         user_id = message.from_user.id
-    else:
-        user_id = str(user_id)  # Приводим к строке для сравнения
     
     # Проверяем в настройках
     for s in settings:
         if (s and len(s) >= 2 and 
             s[0] == "Администратор" and 
-            s[1] == user_id):
+            s[1] == str(user_id)):
             return True
     return False
 
@@ -927,18 +925,16 @@ def admin_user_report_callback(callback_query):
                 
             current_user = row[1]
             
-            # Новая группа пользователя - добавляем разделитель
             if prev_user != current_user and prev_user is not None:
                 current_table += "\n"
             
-            # Имя пользователя жирным подчеркиванием
             if prev_user != current_user:
                 current_table += f"<b><u>{row[0]}</u></b>\n"
                 prev_user = current_user
             
-            # Правильное форматирование строк с фиксированной шириной
+            # ✅ БЕЗОПАСНОЕ форматирование
             date_str = str(row[2])[:10] if row[2] else ""
-            amount_str = f"{float(row[3]):>10,.2f}".replace(',', ' ').replace('.', ',') if row[3] else ""
+            amount_str = str(row[3])[:10] if row[3] else "0.0"
             time_str = str(row[5])[:5] if row[5] else ""
             
             line = f"{date_str:<12} {amount_str:<12} {time_str:>8}\n"
@@ -957,10 +953,10 @@ def admin_user_report_callback(callback_query):
     bot.delete_message(callback_query.message.chat.id, info.message_id)
     
     # Отправляем все сообщения
-    for msg in messages:
-        bot.send_message(callback_query.message.chat.id, msg, parse_mode='HTML')
+    #for msg in messages:
+        #bot.send_message(callback_query.message.chat.id, msg, parse_mode='HTML')
 
-    bot.delete_message(callback_query.message.chat.id, info.message_id)
+    #bot.delete_message(callback_query.message.chat.id, info.message_id)
     for i, msg in enumerate(messages):
         bot.send_message(
             callback_query.message.chat.id,

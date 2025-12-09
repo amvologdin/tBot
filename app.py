@@ -1194,8 +1194,14 @@ def text_handler(message):
     if user_state.get("state") == "WAIT_QUANTITY":
         save_operation(message)
         return
-    main_menu_handler(message)
-    # Остальные тексты уже перехватываются хендлером main_menu_handler
+    else:
+        user_id = message.chat.id
+        main_kb = build_main_reply_keyboard(user_id)
+        bot.send_message(
+            message.chat.id,
+            f"Привет, {message.from_user.first_name}!",
+            reply_markup=main_kb,
+        )
 
 
 # ==============================

@@ -794,7 +794,7 @@ def last_rows_command(message):
 )
 def main_menu_handler(message):
     user_id = message.from_user.id
-    keyboard = build_main_reply_keyboard(message)
+    keyboard = build_main_reply_keyboard(user_id)
     
     if message.text == "📝 Заполнить отчет":
         report_command(message)
@@ -842,7 +842,7 @@ def admin_command_handler(message):
     if is_admin(message):
         admin_command(message)
     else:
-        keyboard = build_main_reply_keyboard(message)
+        keyboard = build_main_reply_keyboard(message.from_user.id)
         bot.send_message(
             message.chat.id, 
             "❌ Доступ запрещен!", 

@@ -485,7 +485,8 @@ def is_admin(message=None, user_id=None) -> bool:
         if message is None:
             return False
         user_id = message.from_user.id
-    
+
+    reload_data(scope="s")
     # Проверяем в настройках
     for s in settings:
         if (s and len(s) >= 2 and 

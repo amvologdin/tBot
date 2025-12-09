@@ -20,6 +20,12 @@ from telebot.types import (
     KeyboardButton,
 )
 
+from flask import Flask
+app = Flask(__name__)
+
+@app.route("/", methods=["GET", "HEAD"])
+def index():
+    return "OK", 200
 
 # ==============================
 #  Общие утилиты и настройки
@@ -1105,6 +1111,7 @@ def text_handler(message):
 # ==============================
 #  Точка входа
 # ==============================
+
 
 def main():
     # Запуск фонового уведомителя

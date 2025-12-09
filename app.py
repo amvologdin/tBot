@@ -486,7 +486,7 @@ def is_admin(message=None, user_id=None) -> bool:
             return False
         user_id = message.from_user.id
 
-    reload_data(scope="s")
+    reload_data(scope="s",force=True)
     # Проверяем в настройках
     for s in settings:
         if (s and len(s) >= 2 and 
@@ -909,6 +909,11 @@ def default_callback(callback_query):
 
 @bot.callback_query_handler(lambda q: q.data.startswith("admin_UserReport"))
 def admin_user_report_callback(callback_query):
+    reload_data(scope="s",force=True)
+    if not is_admin(user_id=callback_query.message.chat.id):
+        bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+        bot.send_message(callback_query.message.chat.id, "Ты не админ!")
+        return
     info = bot.send_message(callback_query.message.chat.id, "Загружаю данные...")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
 

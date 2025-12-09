@@ -602,12 +602,11 @@ def save_operation(message):
     ]
     answers_sheet.update_cells(cells_to_update, value_input_option="USER_ENTERED")
 
-    bot.delete_message(save_info.chat.id, save_info.message_id)
-
     # Сбрасываем состояние и предлагаем продолжить
     bot.user_data[chat_id] = {}
     user_id = message.from_user.id
     keyboard = build_main_reply_keyboard(user_id)
+    bot.delete_message(save_info.chat.id, save_info.message_id)
     bot.send_message(chat_id, "Отлично, операция сохранена.", reply_markup=keyboard)
     report_command(message, "Продолжим заполнение отчета?")
 

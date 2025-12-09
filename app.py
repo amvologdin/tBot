@@ -1126,4 +1126,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # локальный запуск: и Flask, и бот
+    threading.Thread(target=main, daemon=True).start()
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

@@ -598,7 +598,9 @@ def save_operation(message):
 
     # Сбрасываем состояние и предлагаем продолжить
     bot.user_data[chat_id] = {}
-    bot.send_message(chat_id, "Отлично, операция сохранена.")
+    user_id = message.from_user.id
+    keyboard = build_main_reply_keyboard(user_id)
+    bot.send_message(chat_id, "Отлично, операция сохранена.", reply_markup=keyboard)
     report_command(message, "Продолжим заполнение отчета?")
 
 

@@ -378,7 +378,7 @@ def build_main_reply_keyboard(user_id: int) -> ReplyKeyboardMarkup:
     )
     
     # Анекдот + Админ в одном ряду
-    if is_admin(user_id):
+    if is_admin(user_id=user_id):
         kb.row(
             KeyboardButton("🎭 Анекдот"),
             KeyboardButton("🔧 Админ")
@@ -478,12 +478,21 @@ def get_buttons_with_questions_detail(path: str, message=None) -> InlineKeyboard
 #  Вспомогательные функции
 # ==============================
 
-def is_admin(message) -> bool:
+def is_admin(message=None, user_id=None) -> bool:
     """Проверка, что текущий пользователь — администратор."""
-    if message is None:
-        return False
+    # Определяем user_id из параметров
+    if user_id is None:
+        if message is None:
+            return False
+        user_id = message.from_user.id
+    else:
+        user_id = str(user_id)  # Приводим к строке для сравнения
+    
+    # Проверяем в настройках
     for s in settings:
-        if s and s[0] == "Администратор" and s[1] == str(message.chat.id):
+        if (s and len(s) >= 2 and 
+            s[0] == "Администратор" and 
+            s[1] == user_id):
             return True
     return False
 
@@ -698,7 +707,7 @@ def notify(exc: bool = False):
 @bot.message_handler(commands=["start"])
 def start_command(message):
     reload_data(scope="s", force=True, silent=True)
-    user_id = message.from_user.id
+    user_id = message.chat.id
     main_kb = build_main_reply_keyboard(user_id)
     bot.send_message(
         message.chat.id,
@@ -782,9 +791,13 @@ def last_rows_command(message):
         "📅 Результат за месяц",
         "🕒 Последние 3 операции",
         "🎭 Анекдот",
+        "🔧 Админ"  # Добавляем админскую кнопку
     ]
 )
 def main_menu_handler(message):
+    user_id = message.from_user.id
+    keyboard = build_main_reply_keyboard(message)
+    
     if message.text == "📝 Заполнить отчет":
         report_command(message)
     elif message.text == "📊 Результат за день":
@@ -794,7 +807,16 @@ def main_menu_handler(message):
     elif message.text == "🕒 Последние 3 операции":
         last_rows_command(message)
     elif message.text == "🎭 Анекдот":
-        bot.send_message(message.chat.id, get_anekdot())
+        bot.send_message(message.chat.id, get_anekdot(), reply_markup=keyboard)
+    elif message.text == "🔧 Админ":
+        if is_admin(message):
+            admin_command(message)
+        else:
+            bot.send_message(
+                message.chat.id, 
+                "❌ Доступ запрещен!", 
+                reply_markup=keyboard
+            )
 
 
 # ==============================
@@ -815,6 +837,19 @@ def admin_command(message):
     message_user_set.add(
         {"message_id": last_question.message_id, "chat_id": last_question.chat.id}
     )
+
+@bot.message_handler(commands=["admin"])
+def admin_command_handler(message):
+    """Обработчик команды /admin."""
+    if is_admin(message):
+        admin_command(message)
+    else:
+        keyboard = build_main_reply_keyboard(message)
+        bot.send_message(
+            message.chat.id, 
+            "❌ Доступ запрещен!", 
+            reply_markup=keyboard
+        )
 
 
 # ==============================

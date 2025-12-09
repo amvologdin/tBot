@@ -704,7 +704,7 @@ def start_command(message):
         f"Привет, {message.from_user.first_name}!\n\n{welcome_message}",
         reply_markup=main_kb,
     )
-    def_command(message, "Ну что, начнем с заполнения первого отчета?")
+    #def_command(message, "Ну что, начнем с заполнения первого отчета?")
 
 
 def def_command(message, text="Вот мои команды:"):

@@ -1194,6 +1194,7 @@ def text_handler(message):
     if user_state.get("state") == "WAIT_QUANTITY":
         save_operation(message)
         return
+    main_menu_handler(message)
     # Остальные тексты уже перехватываются хендлером main_menu_handler
 
 

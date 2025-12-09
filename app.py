@@ -150,7 +150,7 @@ def get_anekdot() -> str:
 
         # Берем лучший из отфильтрованных
         best_one = sorted(anecdotes, key=lambda x: x["rate"], reverse=True)[0]["text"]
-        return "Держи шутку:\n" + best_one.replace("<br/>", "\n") + '\n anekdot.ru'
+        return "Держи случайную шутку с anekdot.ru:\n" + best_one.replace("<br/>", "\n") 
     
     except Exception:
         return "Шутки нет 🤷‍♂️"

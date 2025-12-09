@@ -698,7 +698,8 @@ def notify(exc: bool = False):
 @bot.message_handler(commands=["start"])
 def start_command(message):
     reload_data(scope="s", force=True, silent=True)
-    main_kb = build_main_reply_keyboard()
+    user_id = message.from_user.id
+    main_kb = build_main_reply_keyboard(user_id)
     bot.send_message(
         message.chat.id,
         f"Привет, {message.from_user.first_name}!\n\n{welcome_message}",

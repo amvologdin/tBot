@@ -942,7 +942,7 @@ def admin_user_report_callback(callback_query):
     header = "Дата         Сумма       Часы"
 
     for row in results_detail:
-        fio, user_id, date_raw, sum_raw, time_raw = row
+        fio, user_id, date_raw, sum_raw, mot_raw,time_raw = row
 
         # финальное Итого по предприятию - сохраняем строку
         if fio == "Итого":             

@@ -43,6 +43,20 @@ def is_running_in_docker() -> bool:
         pass
     return False
 
+MONTHS_RU = {
+    1: "Январь",
+    2: "Февраль",
+    3: "Март",
+    4: "Апрель",
+    5: "Май",
+    6: "Июнь",
+    7: "Июль",
+    8: "Август",
+    9: "Сентябрь",
+    10: "Октябрь",
+    11: "Ноябрь",
+    12: "Декабрь",
+}
 
 # ---------- Загрузка сервисного ключа Google с вариативностью ----------
 
@@ -604,9 +618,9 @@ def save_operation(message):
 
     # Сбрасываем состояние и предлагаем продолжить
     bot.user_data[chat_id] = {}
-    user_id = message.from_user.id
-    keyboard = build_main_reply_keyboard(user_id)
+    user_id = message.from_user.id    
     bot.delete_message(save_info.chat.id, save_info.message_id)
+    keyboard = build_main_reply_keyboard(user_id)
     bot.send_message(chat_id, "Отлично, операция сохранена.", reply_markup=keyboard)
     report_command(message, "Продолжим заполнение отчета?")
 
@@ -906,68 +920,85 @@ def default_callback(callback_query):
         finish(callback_query.message, done=0)
 
 
+def format_row_raw(date_raw, sum_raw, time_raw) -> str:
+    # всё — просто строки, никаких float/date
+    date_str = str(date_raw or "")
+    sum_str = str(sum_raw or "")
+    time_str = str(time_raw or "")
+    # подбираем ширины «на глаз», чтобы было ровно
+    return f"{date_str:<12} {sum_str:>12} {time_str:>8}"
+
 @bot.callback_query_handler(lambda q: q.data.startswith("admin_UserReport"))
 def admin_user_report_callback(callback_query):
-    reload_data(scope="s",force=True)
+    reload_data(scope="s", force=True)
     if not is_admin(user_id=callback_query.message.chat.id):
         bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
         bot.send_message(callback_query.message.chat.id, "Ты не админ!")
         return
+
     info = bot.send_message(callback_query.message.chat.id, "Загружаю данные...")
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
 
-    reload_data(scope="r")
-    results_detail = results
+    reload_data(scope="r", force=True)
+    results_detail = results  # строки как в примере из GSheet
 
-    messages = []
-    current_table = ""
-    prev_user = None
+    lines: list[str] = []
+    current_user_id = None
+    current_user_name = None
 
-    if len(results_detail) > 1:
-        for row in results_detail:
-            if len(row) < 6 or not row[1]:
-                continue
-                
-            current_user = row[1]
-            
-            if prev_user != current_user and prev_user is not None:
-                current_table += "\n"
-            
-            if prev_user != current_user:
-                current_table += f"<b><u>{row[0]}</u></b>\n"
-                prev_user = current_user
-            
-            # ✅ БЕЗОПАСНОЕ форматирование
-            date_str = str(row[2])[:10] if row[2] else ""
-            amount_str = str(row[3])[:10] if row[3] else "0.0"
-            time_str = str(row[5])[:5] if row[5] else ""
-            
-            line = f"{date_str:<12} {amount_str:<12} {time_str:>8}\n"
-            current_table += line
-            
-            # Разбиваем на сообщения по 3000 символов
-            if len(current_table) > 2800:  # Оставляем запас
-                messages.append(current_table)
-                current_table = ""
-        
-        if current_table:
-            messages.append(current_table)
-    else:
-        messages.append("Пока пусто")
+    header = "Дата         Сумма       Мотивация   Часы"
 
+    for row in results_detail:
+        fio, user_id, date_raw, sum_raw, mot_raw, time_raw = row
+
+        # финальное Итого по предприятию
+        if fio == "Итого":            
+            total_line = f"{'':<12} {sum_raw:<11} {mot_raw:<11} {time_raw}"
+            continue
+
+        # ------- ИТОГ ПО ПОЛЬЗОВАТЕЛЮ -------
+        if isinstance(fio, str) and user_id.startswith("Всего ("):
+            # тут БЕЗ заголовка
+            lines.append("-" * len(header))
+            # просто итоговая строка пользователя
+            lines.append(f"{fio:<12} {sum_raw:<11} {mot_raw:<11} {time_raw}")
+            lines.append("")  # пустая строка‑разделитель
+            current_user_id = None
+            current_user_name = None
+            continue
+        # ------- КОНЕЦ БЛОКА ИТОГА -------
+
+        # обычные строки с операциями
+        if user_id != current_user_id:
+            current_user_id = user_id
+            current_user_name = fio
+            lines.append(f"{current_user_name}")
+            lines.append(header)
+            lines.append("-" * len(header))
+
+        date_str = str(date_raw or "")
+        sum_str = str(sum_raw or "")
+        mot_str = str(mot_raw or "")
+        time_str = str(time_raw or "")
+
+        lines.append(f"{date_str:<12} {sum_str:<11} {mot_str:<11} {time_str}")
+
+    # добавляем общий итог по предприятию, если был
+    try:
+        lines.append("Итого по предприятию")
+        lines.append("-" * len(header))
+        lines.append(total_line)
+    except NameError:
+        pass  # если строки Итого не было
+
+    now = datetime.now()
+    month_name = MONTHS_RU[now.month]
+    text = (
+        f"Текущая результативность за {month_name} {now.year}:\n"
+        "<pre><code>\n" + "\n".join(lines) + "\n</code></pre>"
+    )
     bot.delete_message(callback_query.message.chat.id, info.message_id)
-    
-    # Отправляем все сообщения
-    #for msg in messages:
-        #bot.send_message(callback_query.message.chat.id, msg, parse_mode='HTML')
-
-    #bot.delete_message(callback_query.message.chat.id, info.message_id)
-    for i, msg in enumerate(messages):
-        bot.send_message(
-            callback_query.message.chat.id,
-            ("\n ->" if i > 0 else "") + msg,
-            parse_mode="HTML",
-        )
+    bot.send_message(callback_query.message.chat.id, text, parse_mode="HTML")
 
 
 @bot.callback_query_handler(lambda q: q.data.startswith("admin_Hide"))

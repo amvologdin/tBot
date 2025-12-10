@@ -951,7 +951,7 @@ def admin_user_report_callback(callback_query):
 
         # ------- ИТОГ ПО ПОЛЬЗОВАТЕЛЮ -------
         if isinstance(fio, str) and user_id.startswith("Всего ("):
-            lines.append("-" * len(header))
+            lines.append("—" * len(header))
             lines.append(f"{fio:<12} {sum_raw:<11} {mot_raw:<11} {time_raw}")
             lines.append("")  # пустая строка-разделитель
             current_user_id = None
@@ -965,7 +965,7 @@ def admin_user_report_callback(callback_query):
             current_user_name = fio
             lines.append(f"{current_user_name}")
             lines.append(header)
-            lines.append("-" * len(header))
+            lines.append("—" * len(header))
 
         date_str = str(date_raw or "")
         sum_str = str(sum_raw or "")
@@ -978,7 +978,7 @@ def admin_user_report_callback(callback_query):
     if total_line:
         lines.append("")
         lines.append("Итого по предприятию")
-        lines.append("-" * len(header))
+        lines.append("—" * len(header))
         lines.append(total_line)
 
     now = datetime.now()

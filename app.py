@@ -939,20 +939,20 @@ def admin_user_report_callback(callback_query):
     current_user_name = None
     total_line = None  # сохраняем итоговую строку заранее
 
-    header = "Дата         Сумма       Мотивация   Часы"
+    header = "Дата         Сумма       Часы"
 
     for row in results_detail:
-        fio, user_id, date_raw, sum_raw, mot_raw, time_raw = row
+        fio, user_id, date_raw, sum_raw, time_raw = row
 
         # финальное Итого по предприятию - сохраняем строку
         if fio == "Итого":             
-            total_line = f"{'':<12} {sum_raw:<11} {mot_raw:<11} {time_raw}"
+            total_line = f"{'':<12} {sum_raw:<11} {time_raw}"
             continue
 
         # ------- ИТОГ ПО ПОЛЬЗОВАТЕЛЮ -------
         if isinstance(fio, str) and user_id.startswith("Всего ("):
             lines.append("—" * len(header))
-            lines.append(f"{fio:<12} {sum_raw:<11} {mot_raw:<11} {time_raw}")
+            lines.append(f"{fio:<12} {sum_raw:<11} {time_raw}")
             lines.append("")  # пустая строка-разделитель
             current_user_id = None
             current_user_name = None
@@ -969,10 +969,9 @@ def admin_user_report_callback(callback_query):
 
         date_str = str(date_raw or "")
         sum_str = str(sum_raw or "")
-        mot_str = str(mot_raw or "")
         time_str = str(time_raw or "")
 
-        lines.append(f"{date_str:<12} {sum_str:<11} {mot_str:<11} {time_str}")
+        lines.append(f"{date_str:<12} {sum_str:<11} {time_str}")
 
     # добавляем общий итог по предприятию
     if total_line:

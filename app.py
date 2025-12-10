@@ -920,14 +920,6 @@ def default_callback(callback_query):
         finish(callback_query.message, done=0)
 
 
-def format_row_raw(date_raw, sum_raw, time_raw) -> str:
-    # всё — просто строки, никаких float/date
-    date_str = str(date_raw or "")
-    sum_str = str(sum_raw or "")
-    time_str = str(time_raw or "")
-    # подбираем ширины «на глаз», чтобы было ровно
-    return f"{date_str:<12} {sum_str:>12} {time_str:>8}"
-
 @bot.callback_query_handler(lambda q: q.data.startswith("admin_UserReport"))
 def admin_user_report_callback(callback_query):
     reload_data(scope="s", force=True)
@@ -940,29 +932,28 @@ def admin_user_report_callback(callback_query):
     bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
 
     reload_data(scope="r", force=True)
-    results_detail = results  # строки как в примере из GSheet
+    results_detail = results
 
     lines: list[str] = []
     current_user_id = None
     current_user_name = None
+    total_line = None  # сохраняем итоговую строку заранее
 
-    header = "Дата         Сумма       Мотивация   Часы"
+    header = "Дата         Сумма       Мотивация   Часы"
 
     for row in results_detail:
         fio, user_id, date_raw, sum_raw, mot_raw, time_raw = row
 
-        # финальное Итого по предприятию
-        if fio == "Итого":            
+        # финальное Итого по предприятию - сохраняем строку
+        if fio == "Итого":             
             total_line = f"{'':<12} {sum_raw:<11} {mot_raw:<11} {time_raw}"
             continue
 
         # ------- ИТОГ ПО ПОЛЬЗОВАТЕЛЮ -------
         if isinstance(fio, str) and user_id.startswith("Всего ("):
-            # тут БЕЗ заголовка
             lines.append("-" * len(header))
-            # просто итоговая строка пользователя
             lines.append(f"{fio:<12} {sum_raw:<11} {mot_raw:<11} {time_raw}")
-            lines.append("")  # пустая строка‑разделитель
+            lines.append("")  # пустая строка-разделитель
             current_user_id = None
             current_user_name = None
             continue
@@ -983,22 +974,44 @@ def admin_user_report_callback(callback_query):
 
         lines.append(f"{date_str:<12} {sum_str:<11} {mot_str:<11} {time_str}")
 
-    # добавляем общий итог по предприятию, если был
-    try:
+    # добавляем общий итог по предприятию
+    if total_line:
+        lines.append("")
         lines.append("Итого по предприятию")
         lines.append("-" * len(header))
         lines.append(total_line)
-    except NameError:
-        pass  # если строки Итого не было
 
     now = datetime.now()
     month_name = MONTHS_RU[now.month]
-    text = (
-        f"Текущая результативность за {month_name} {now.year}:\n"
-        "<pre><code>\n" + "\n".join(lines) + "\n</code></pre>"
-    )
+    
     bot.delete_message(callback_query.message.chat.id, info.message_id)
-    bot.send_message(callback_query.message.chat.id, text, parse_mode="HTML")
+    
+    # Разбиваем на блоки
+    def send_in_chunks(lines_list, chat_id):
+        chunk_size = 3800  # запас от 4096
+        current_chunk = []
+        current_length = 0
+        
+        for line in lines_list:
+            test_chunk = current_chunk + [line]
+            test_length = sum(len(l) for l in test_chunk) + len(test_chunk) - 1  # + \n между строками
+            
+            if current_length + len(line) + 1 > chunk_size or test_length > chunk_size:
+                if current_chunk:
+                    text = f"Текущая результативность за {month_name} {now.year}:\n<pre><code>\n" + "\n".join(current_chunk) + "\n</code></pre>"
+                    bot.send_message(chat_id, text, parse_mode="HTML")
+                current_chunk = [line]
+                current_length = len(line)
+            else:
+                current_chunk.append(line)
+                current_length = test_length
+        
+        # отправляем последний чанк
+        if current_chunk:
+            text = f"Текущая результативность за {month_name} {now.year}:\n<pre><code>\n" + "\n".join(current_chunk) + "\n</code></pre>"
+            bot.send_message(chat_id, text, parse_mode="HTML")
+    
+    send_in_chunks(lines, callback_query.message.chat.id)
 
 
 @bot.callback_query_handler(lambda q: q.data.startswith("admin_Hide"))

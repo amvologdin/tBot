@@ -500,7 +500,7 @@ def is_admin(message=None, user_id=None) -> bool:
             return False
         user_id = message.from_user.id
 
-    reload_data(scope="s",force=True)
+    reload_data(scope="s")
     # Проверяем в настройках
     for s in settings:
         if (s and len(s) >= 2 and 
@@ -619,8 +619,8 @@ def save_operation(message):
     # Сбрасываем состояние и предлагаем продолжить
     bot.user_data[chat_id] = {}
     user_id = message.from_user.id    
-    bot.delete_message(save_info.chat.id, save_info.message_id)
     keyboard = build_main_reply_keyboard(user_id)
+    bot.delete_message(save_info.chat.id, save_info.message_id)    
     bot.send_message(chat_id, "Отлично, операция сохранена.", reply_markup=keyboard)
     report_command(message, "Продолжим заполнение отчета?")
 

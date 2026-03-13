@@ -595,7 +595,7 @@ def save_operation(message):
 
     row = [
         message.from_user.first_name,
-        message.from_user.id,
+        str(message.from_user.id),
         model,
         operation,
         quantity,
